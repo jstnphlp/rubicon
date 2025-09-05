@@ -25,4 +25,5 @@ public class CommandService {
         command.execute();
         undoStack.push(command);
     }
+
 }

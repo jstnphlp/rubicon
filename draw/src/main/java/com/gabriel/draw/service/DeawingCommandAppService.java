@@ -13,14 +13,16 @@ import java.awt.*;
 
 public class DeawingCommandAppService implements AppService {
     public AppService appService;
-    public DeawingCommandAppService(AppService appService){
+
+    public DeawingCommandAppService(AppService appService) {
         this.appService = appService;
 
     }
 
     @Override
     public void undo() {
-        CommandService.undo();;
+        CommandService.undo();
+        ;
         appService.repaint();
     }
 
@@ -77,7 +79,7 @@ public class DeawingCommandAppService implements AppService {
 
     @Override
     public void scale(Shape shape, Point newEnd) {
-        appService.scale(shape,newEnd);
+        appService.scale(shape, newEnd);
     }
 
     @Override
@@ -114,5 +116,20 @@ public class DeawingCommandAppService implements AppService {
     @Override
     public void repaint() {
         appService.repaint();
+    }
+
+    @Override
+    public Shape getSelectedShape() {
+        return appService.getSelectedShape();
+    }
+
+    @Override
+    public void setSelectedShape(Shape shape) {
+        appService.setSelectedShape(shape);
+    }
+
+    @Override
+    public void clearSelection() {
+        appService.clearSelection();
     }
 }

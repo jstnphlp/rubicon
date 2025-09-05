@@ -7,6 +7,7 @@ import lombok.Data;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 public class Drawing {
 
@@ -14,8 +15,11 @@ public class Drawing {
     private Color fill;
     private ShapeMode shapeMode = ShapeMode.Rectangle;
     private DrawMode drawMode = DrawMode.Idle;
+    private Shape selectedShape;
     List<Shape> shapes;
-    public Drawing(){
+
+    public Drawing() {
         shapes = new ArrayList<>();
+        this.color = Color.BLACK; // Set default color to black
     }
 }

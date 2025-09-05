@@ -1,6 +1,5 @@
 package com.gabriel.draw.service;
 
-import com.gabriel.draw.view.DrawingView;
 import com.gabriel.drawfx.DrawMode;
 import com.gabriel.drawfx.ShapeMode;
 import com.gabriel.drawfx.model.Drawing;
@@ -18,7 +17,8 @@ public class DrawingAppService implements AppService {
     MoverService moverService;
     ScalerService scalerService;
     JPanel drawingView;
-    public DrawingAppService(){
+
+    public DrawingAppService() {
         drawing = new Drawing();
         moverService = new MoverService();
         scalerService = new ScalerService();
@@ -67,7 +67,7 @@ public class DrawingAppService implements AppService {
     }
 
     @Override
-    public Color getFill(){
+    public Color getFill() {
         return drawing.getFill();
     }
 
@@ -78,7 +78,8 @@ public class DrawingAppService implements AppService {
 
     @Override
     public void move(Shape shape, Point newLoc) {
-        moverService.move(shape, newLoc);}
+        moverService.move(shape, newLoc);
+    }
 
     @Override
     public void scale(Shape shape, Point newEnd) {
@@ -94,6 +95,10 @@ public class DrawingAppService implements AppService {
     @Override
     public void delete(Shape shape) {
         drawing.getShapes().remove(shape);
+        // Clear selection if the deleted shape was selected
+        if (drawing.getSelectedShape() == shape) {
+            drawing.setSelectedShape(null);
+        }
     }
 
     @Override
@@ -119,5 +124,20 @@ public class DrawingAppService implements AppService {
     @Override
     public void repaint() {
         drawingView.repaint();
+    }
+
+    @Override
+    public Shape getSelectedShape() {
+        return drawing.getSelectedShape();
+    }
+
+    @Override
+    public void setSelectedShape(Shape shape) {
+        drawing.setSelectedShape(shape);
+    }
+
+    @Override
+    public void clearSelection() {
+        drawing.setSelectedShape(null);
     }
 }
