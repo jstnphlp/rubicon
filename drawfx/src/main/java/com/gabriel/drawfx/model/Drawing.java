@@ -16,10 +16,14 @@ public class Drawing {
     private ShapeMode shapeMode = ShapeMode.Rectangle;
     private DrawMode drawMode = DrawMode.Idle;
     private Shape selectedShape;
+    private List<Shape> selectedShapes;
+    private String statusMessage = "Ready";
     List<Shape> shapes;
 
     public Drawing() {
         shapes = new ArrayList<>();
-        this.color = Color.BLACK; // Set default color to black
+        selectedShapes = new ArrayList<>();
+        this.color = Color.BLACK;
+        this.fill = null;
     }
 }

@@ -10,10 +10,15 @@ import java.awt.*;
 public class DrawingView extends JPanel {
     private final AppService appService;
     private Shape currentShape;
+    private com.gabriel.draw.controller.DrawingController controller;
 
     public DrawingView(AppService appService) {
         this.appService = appService;
         appService.setView(this);
+    }
+
+    public void setController(com.gabriel.draw.controller.DrawingController controller) {
+        this.controller = controller;
     }
 
     public void setCurrentShape(Shape shape) {
@@ -33,9 +38,12 @@ public class DrawingView extends JPanel {
             currentShape.getRendererService().render(g, currentShape, false);
         }
 
-        Shape selectedShape = drawing.getSelectedShape();
-        if (selectedShape != null) {
+        for (Shape selectedShape : drawing.getSelectedShapes()) {
             renderSelection(g, selectedShape);
+        }
+
+        if (controller != null && controller.getSelectionRectangle() != null) {
+            renderSelectionRectangle(g, controller.getSelectionRectangle());
         }
     }
 
@@ -52,5 +60,12 @@ public class DrawingView extends JPanel {
         int height = Math.abs(end.y - location.y);
 
         g2d.drawRect(x - 2, y - 2, width + 4, height + 4);
+    }
+
+    private void renderSelectionRectangle(Graphics g, java.awt.Rectangle selectionRect) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[] { 5, 5 }, 0));
+        g2d.drawRect(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height);
     }
 }

@@ -4,6 +4,7 @@ import com.gabriel.draw.command.ResizeShapeCommand;
 import com.gabriel.draw.command.MoveShapeCommand;
 import com.gabriel.draw.command.DeleteShapeCommand;
 import com.gabriel.draw.command.SetColorCommand;
+import com.gabriel.draw.command.SetShapeCommand;
 import com.gabriel.drawfx.ShapeMode;
 import com.gabriel.drawfx.command.CommandService;
 import com.gabriel.drawfx.model.Shape;
@@ -49,14 +50,17 @@ public class DrawingMenuBar extends JMenuBar implements ActionListener {
         add(editMenu);
 
         undoMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
+        undoMenu.setToolTipText("Undo the last action (Ctrl+Z)");
         undoMenu.addActionListener(e -> appService.undo());
         editMenu.add(undoMenu);
 
         redoMenu.setAccelerator(
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        ;
+        redoMenu.setToolTipText("Redo the last undone action (Ctrl+Shift+Z)");
         redoMenu.addActionListener(e -> appService.redo());
         editMenu.add(redoMenu);
+
+        editMenu.addSeparator();
 
         JMenu propertiesMenu = new JMenu("Properties");
         add(propertiesMenu);
@@ -64,100 +68,112 @@ public class DrawingMenuBar extends JMenuBar implements ActionListener {
         JMenu drawMenu = new JMenu("Shapes");
         editMenu.add(drawMenu);
 
+        newMenu.setToolTipText("Create a new drawing");
+        saveMenu.setToolTipText("Save the current drawing");
         fileMenu.add(newMenu);
+        fileMenu.addSeparator();
         fileMenu.add(saveMenu);
 
+        changeColorMenu.setToolTipText("Change the color of selected shapes or set default drawing color");
         changeColorMenu.addActionListener(e -> {
-            Shape s = appService.getSelectedShape();
-            if (s == null) {
+            java.util.List<Shape> selectedShapes = appService.getSelectedShapes();
+            if (selectedShapes.isEmpty()) {
                 Color chosen = JColorChooser.showDialog(null, "Choose Drawing Color", appService.getColor());
                 if (chosen != null)
                     appService.setColor(chosen);
             } else {
-                Color chosen = JColorChooser.showDialog(null, "Choose Shape Color", s.getColor());
+                Color chosen = JColorChooser.showDialog(null, "Choose Shape Color", selectedShapes.get(0).getColor());
                 if (chosen != null)
-                    CommandService.ExecuteCommand(new SetColorCommand(appService, s, chosen));
+                    CommandService.ExecuteCommand(new SetColorCommand(appService, selectedShapes, chosen));
             }
         });
         propertiesMenu.add(changeColorMenu);
+        propertiesMenu.addSeparator();
 
+        resizeMenu.setToolTipText("Resize selected shapes by a scale factor");
         propertiesMenu.add(resizeMenu);
         resizeMenu.addActionListener(e -> {
-            Shape s = appService.getSelectedShape();
-            if (s == null) {
-                JOptionPane.showMessageDialog(null, "No shape selected");
+            java.util.List<Shape> selectedShapes = appService.getSelectedShapes();
+            if (selectedShapes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No shapes selected");
                 return;
             }
-            Point loc = s.getLocation();
-            int curW = Math.abs(s.getEnd().x - loc.x);
-            int curH = Math.abs(s.getEnd().y - loc.y);
+
             JPanel panel = new JPanel(new GridLayout(2, 2));
-            panel.add(new JLabel("Width:"));
-            JTextField widthField = new JTextField(String.valueOf(curW));
-            panel.add(widthField);
-            panel.add(new JLabel("Height:"));
-            JTextField heightField = new JTextField(String.valueOf(curH));
-            panel.add(heightField);
-            int result = JOptionPane.showConfirmDialog(null, panel, "Resize", JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.PLAIN_MESSAGE);
+            panel.add(new JLabel("Scale Factor:"));
+            JTextField scaleField = new JTextField("1.0");
+            panel.add(scaleField);
+            panel.add(new JLabel("(1.0 = original size)"));
+            panel.add(new JLabel(""));
+
+            int result = JOptionPane.showConfirmDialog(null, panel, "Resize " + selectedShapes.size() + " shape(s)",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result != JOptionPane.OK_OPTION)
                 return;
             try {
-                int w = Integer.parseInt(widthField.getText().trim());
-                int h = Integer.parseInt(heightField.getText().trim());
-                Point newEnd = new Point(loc.x + w, loc.y + h);
-                CommandService.ExecuteCommand(new ResizeShapeCommand(appService, s, newEnd));
+                double scaleFactor = Double.parseDouble(scaleField.getText().trim());
+                CommandService.ExecuteCommand(new ResizeShapeCommand(appService, selectedShapes, scaleFactor));
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Invalid size");
+                JOptionPane.showMessageDialog(null, "Invalid scale factor");
             }
         });
+        moveMenu.setToolTipText("Move selected shapes by a delta amount");
         propertiesMenu.add(moveMenu);
+        propertiesMenu.addSeparator();
         moveMenu.addActionListener(e -> {
-            Shape s = appService.getSelectedShape();
-            if (s == null) {
-                JOptionPane.showMessageDialog(null, "No shape selected");
+            java.util.List<Shape> selectedShapes = appService.getSelectedShapes();
+            if (selectedShapes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No shapes selected");
                 return;
             }
-            Point p = s.getLocation();
+
             JPanel panel = new JPanel(new GridLayout(2, 2));
-            panel.add(new JLabel("X:"));
-            JTextField xField = new JTextField(String.valueOf(p.x));
+            panel.add(new JLabel("Delta X:"));
+            JTextField xField = new JTextField("0");
             panel.add(xField);
-            panel.add(new JLabel("Y:"));
-            JTextField yField = new JTextField(String.valueOf(p.y));
+            panel.add(new JLabel("Delta Y:"));
+            JTextField yField = new JTextField("0");
             panel.add(yField);
-            int result = JOptionPane.showConfirmDialog(null, panel, "Move", JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.PLAIN_MESSAGE);
+
+            int result = JOptionPane.showConfirmDialog(null, panel, "Move " + selectedShapes.size() + " shape(s)",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result != JOptionPane.OK_OPTION)
                 return;
             try {
-                int x = Integer.parseInt(xField.getText().trim());
-                int y = Integer.parseInt(yField.getText().trim());
-                CommandService.ExecuteCommand(new MoveShapeCommand(appService, s, new Point(x, y)));
+                int deltaX = Integer.parseInt(xField.getText().trim());
+                int deltaY = Integer.parseInt(yField.getText().trim());
+                CommandService
+                        .ExecuteCommand(new MoveShapeCommand(appService, selectedShapes, new Point(deltaX, deltaY)));
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Invalid position");
             }
         });
-        deleteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
+        deleteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+        deleteMenu.setToolTipText("Delete selected shapes (Delete key)");
         propertiesMenu.add(deleteMenu);
         deleteMenu.addActionListener(e -> {
-            Shape s = appService.getSelectedShape();
-            if (s == null) {
-                JOptionPane.showMessageDialog(null, "No shape selected");
+            java.util.List<Shape> selectedShapes = appService.getSelectedShapes();
+            if (selectedShapes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No shapes selected");
                 return;
             }
-            CommandService.ExecuteCommand(new DeleteShapeCommand(appService, s));
+            CommandService.ExecuteCommand(new DeleteShapeCommand(appService, selectedShapes));
             appService.clearSelection();
         });
 
+        lineMenu.setToolTipText("Set drawing mode to Line");
         drawMenu.add(lineMenu);
-        lineMenu.addActionListener(e -> appService.setShapeMode(ShapeMode.Line));
+        lineMenu.addActionListener(e -> CommandService.ExecuteCommand(new SetShapeCommand(appService, ShapeMode.Line)));
 
+        rectMenu.setToolTipText("Set drawing mode to Rectangle");
         drawMenu.add(rectMenu);
-        rectMenu.addActionListener(e -> appService.setShapeMode(ShapeMode.Rectangle));
+        rectMenu.addActionListener(
+                e -> CommandService.ExecuteCommand(new SetShapeCommand(appService, ShapeMode.Rectangle)));
 
+        ellMenu.setToolTipText("Set drawing mode to Ellipse");
         drawMenu.add(ellMenu);
-        ellMenu.addActionListener(e -> appService.setShapeMode(ShapeMode.Ellipse));
+        ellMenu.addActionListener(
+                e -> CommandService.ExecuteCommand(new SetShapeCommand(appService, ShapeMode.Ellipse)));
 
     }
 

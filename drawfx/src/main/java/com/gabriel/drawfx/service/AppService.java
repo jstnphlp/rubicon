@@ -42,6 +42,18 @@ public interface AppService {
 
     void clearSelection();
 
+    java.util.List<Shape> getSelectedShapes();
+
+    void setSelectedShapes(java.util.List<Shape> shapes);
+
+    void addSelectedShape(Shape shape);
+
+    void removeSelectedShape(Shape shape);
+
+    void setStatusMessage(String message);
+
+    String getStatusMessage();
+
     void close();
 
     Object getModel();

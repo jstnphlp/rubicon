@@ -3,6 +3,7 @@ package com.gabriel.draw.service;
 import com.gabriel.drawfx.model.Shape;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectionService {
@@ -15,6 +16,17 @@ public class SelectionService {
             }
         }
         return null;
+    }
+
+    public List<Shape> findShapesInRectangle(Rectangle selectionRect, List<Shape> shapes) {
+        List<Shape> selectedShapes = new ArrayList<>();
+        for (Shape shape : shapes) {
+            Rectangle shapeBounds = getShapeBounds(shape);
+            if (selectionRect.intersects(shapeBounds)) {
+                selectedShapes.add(shape);
+            }
+        }
+        return selectedShapes;
     }
 
     public Rectangle getShapeBounds(Shape shape) {

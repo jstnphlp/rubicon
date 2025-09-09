@@ -13,7 +13,7 @@ import java.awt.*;
 
 public class DrawingAppService implements AppService {
 
-    final private Drawing drawing;;
+    final private Drawing drawing;
     MoverService moverService;
     ScalerService scalerService;
     JPanel drawingView;
@@ -28,12 +28,14 @@ public class DrawingAppService implements AppService {
 
     @Override
     public void undo() {
-
+        com.gabriel.drawfx.command.CommandService.undo();
+        repaint();
     }
 
     @Override
     public void redo() {
-
+        com.gabriel.drawfx.command.CommandService.redo();
+        repaint();
     }
 
     @Override
@@ -95,7 +97,6 @@ public class DrawingAppService implements AppService {
     @Override
     public void delete(Shape shape) {
         drawing.getShapes().remove(shape);
-        // Clear selection if the deleted shape was selected
         if (drawing.getSelectedShape() == shape) {
             drawing.setSelectedShape(null);
         }
@@ -139,5 +140,38 @@ public class DrawingAppService implements AppService {
     @Override
     public void clearSelection() {
         drawing.setSelectedShape(null);
+        drawing.getSelectedShapes().clear();
+    }
+
+    @Override
+    public java.util.List<Shape> getSelectedShapes() {
+        return drawing.getSelectedShapes();
+    }
+
+    @Override
+    public void setSelectedShapes(java.util.List<Shape> shapes) {
+        drawing.setSelectedShapes(shapes);
+    }
+
+    @Override
+    public void addSelectedShape(Shape shape) {
+        if (!drawing.getSelectedShapes().contains(shape)) {
+            drawing.getSelectedShapes().add(shape);
+        }
+    }
+
+    @Override
+    public void removeSelectedShape(Shape shape) {
+        drawing.getSelectedShapes().remove(shape);
+    }
+
+    @Override
+    public void setStatusMessage(String message) {
+        drawing.setStatusMessage(message);
+    }
+
+    @Override
+    public String getStatusMessage() {
+        return drawing.getStatusMessage();
     }
 }

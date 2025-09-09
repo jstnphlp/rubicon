@@ -132,4 +132,34 @@ public class DeawingCommandAppService implements AppService {
     public void clearSelection() {
         appService.clearSelection();
     }
+
+    @Override
+    public java.util.List<Shape> getSelectedShapes() {
+        return appService.getSelectedShapes();
+    }
+
+    @Override
+    public void setSelectedShapes(java.util.List<Shape> shapes) {
+        appService.setSelectedShapes(shapes);
+    }
+
+    @Override
+    public void addSelectedShape(Shape shape) {
+        appService.addSelectedShape(shape);
+    }
+
+    @Override
+    public void removeSelectedShape(Shape shape) {
+        appService.removeSelectedShape(shape);
+    }
+
+    @Override
+    public void setStatusMessage(String message) {
+        appService.setStatusMessage(message);
+    }
+
+    @Override
+    public String getStatusMessage() {
+        return appService.getStatusMessage();
+    }
 }

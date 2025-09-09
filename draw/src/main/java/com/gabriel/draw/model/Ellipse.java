@@ -10,6 +10,7 @@ public class Ellipse extends Shape {
         super(start);
         this.setEnd(end);
         this.setColor(color);
+        this.setFill(null);
         this.setRendererService(new EllipseRenderer());
     }
 }
